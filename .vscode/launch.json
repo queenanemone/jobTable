@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-JobTableApplication<jobTable>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.jobtable.JobTableApplication",
+            "projectName": "jobTable",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
