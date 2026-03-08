@@ -43,6 +43,12 @@ public class ActivityLogService {
         return ActivityLogResponse.from(logRepository.save(log));
     }
 
+    public List<ActivityLogResponse> getAllLogs() {
+        return logRepository.findAll().stream()
+                .map(ActivityLogResponse::from)
+                .toList();
+    }
+
     public List<ActivityLogResponse> getLogsByStudent(Integer studentId) {
         if (!studentRepository.existsById(studentId)) {
             throw new RuntimeException("학생을 찾을 수 없습니다. id=" + studentId);

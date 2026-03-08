@@ -29,10 +29,13 @@ public class ActivityLogController {
         return ResponseEntity.status(HttpStatus.CREATED).body(activityLogService.createLog(request));
     }
 
-    @Operation(summary = "학생별 활동 이력 조회")
+    @Operation(summary = "활동 이력 조회 (studentId 없으면 전체)")
     @GetMapping
-    public ResponseEntity<List<ActivityLogResponse>> getLogs(@RequestParam Integer studentId) {
-        return ResponseEntity.ok(activityLogService.getLogsByStudent(studentId));
+    public ResponseEntity<List<ActivityLogResponse>> getLogs(@RequestParam(required = false) Integer studentId) {
+        if (studentId != null) {
+            return ResponseEntity.ok(activityLogService.getLogsByStudent(studentId));
+        }
+        return ResponseEntity.ok(activityLogService.getAllLogs());
     }
 
     @Operation(summary = "직업-행위별 활동 이력 조회")

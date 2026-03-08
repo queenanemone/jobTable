@@ -70,11 +70,25 @@ public class JobService {
         jobRepository.deleteById(id);
     }
 
+    public JobActionResponse getJobAction(Integer jobActionId) {
+        JobAction ja = jobActionRepository.findById(jobActionId)
+                .orElseThrow(() -> new RuntimeException("직업-행위를 찾을 수 없습니다. id=" + jobActionId));
+        return JobActionResponse.from(ja);
+    }
+
     // 명세서 6항: /jobs/{id}/actions - 해당 직업의 모든 행위 설정(Schema) 반환
     public List<JobActionResponse> getJobActions(Integer jobId) {
         return jobActionRepository.findByJobId(jobId).stream()
                 .map(JobActionResponse::from)
                 .toList();
+    }
+
+    @Transactional
+    public void deleteJobAction(Integer jobActionId) {
+        if (!jobActionRepository.existsById(jobActionId)) {
+            throw new RuntimeException("직업-행위를 찾을 수 없습니다. id=" + jobActionId);
+        }
+        jobActionRepository.deleteById(jobActionId);
     }
 
     @Transactional

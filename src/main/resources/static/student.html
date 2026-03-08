@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>학급 경제 시스템</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #f1f5f9;
+  --surface: #ffffff;
+  --border:  #e2e8f0;
+  --text:    #0f172a;
+  --muted:   #64748b;
+  --primary: #3b82f6;
+  --primary-d: #2563eb;
+  --radius:  12px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+  background: var(--bg); color: var(--text); min-height: 100vh;
+}
+
+/* ── Login Screen ── */
+#screen-login {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #2563eb 100%);
+}
+.login-card {
+  background: var(--surface); border-radius: 20px;
+  padding: 40px; width: 380px; max-width: 95vw;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.18);
+  text-align: center;
+}
+.login-logo   { font-size: 48px; margin-bottom: 12px; }
+.login-title  { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+.login-sub    { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+.login-select {
+  width: 100%; padding: 12px 14px;
+  border: 2px solid var(--border); border-radius: 10px;
+  font-size: 15px; font-family: inherit; color: var(--text);
+  background: #fff; outline: none; margin-bottom: 14px;
+  transition: border-color 0.15s;
+}
+.login-select:focus { border-color: var(--primary); }
+.btn-login {
+  width: 100%; padding: 13px;
+  background: var(--primary); color: #fff;
+  border: none; border-radius: 10px;
+  font-size: 15px; font-weight: 600; cursor: pointer;
+  font-family: inherit; transition: background 0.1s;
+}
+.btn-login:hover { background: var(--primary-d); }
+
+/* ── App Layout ── */
+#screen-app { display: none; min-height: 100vh; }
+
+.app-header {
+  background: #1e3a8a; color: #fff;
+  padding: 0 24px; height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 10;
+}
+.app-header-left  { font-size: 15px; font-weight: 600; }
+.app-header-right { display: flex; align-items: center; gap: 12px; }
+.logout-btn {
+  background: rgba(255,255,255,0.15); color: #fff;
+  border: 1px solid rgba(255,255,255,0.25);
+  padding: 5px 12px; border-radius: 6px;
+  font-size: 12px; cursor: pointer; font-family: inherit;
+}
+.logout-btn:hover { background: rgba(255,255,255,0.25); }
+
+.app-content { max-width: 800px; margin: 0 auto; padding: 24px 16px 60px; }
+
+/* ── Profile Card ── */
+.profile-card {
+  background: var(--surface); border-radius: var(--radius);
+  border: 1px solid var(--border); padding: 24px;
+  display: flex; align-items: center; gap: 20px;
+  margin-bottom: 20px;
+}
+.profile-avatar {
+  width: 64px; height: 64px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px; flex-shrink: 0;
+  background: #eff6ff;
+}
+.profile-name { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.profile-job  { font-size: 14px; color: var(--muted); margin-bottom: 10px; }
+.profile-stats { display: flex; gap: 16px; }
+.pstat-value { font-size: 18px; font-weight: 700; }
+.pstat-label { font-size: 11px; color: var(--muted); }
+
+/* ── Section ── */
+.section { margin-bottom: 20px; }
+.section-title {
+  font-size: 13px; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+/* ── Action Buttons ── */
+.action-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;
+}
+.action-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px; cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  text-align: left;
+}
+.action-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+.action-card-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.action-card-code  { font-size: 12px; color: var(--muted); }
+.action-card-btn {
+  margin-top: 14px; width: 100%;
+  background: #eff6ff; color: var(--primary);
+  border: none; border-radius: 7px;
+  padding: 8px; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  transition: background 0.1s;
+}
+.action-card-btn:hover { background: #dbeafe; }
+
+.no-job-box {
+  background: var(--surface); border-radius: var(--radius);
+  border: 1px solid var(--border); padding: 36px;
+  text-align: center; color: var(--muted); font-size: 14px;
+}
+.no-job-icon { font-size: 32px; margin-bottom: 10px; }
+
+/* ── Log Table ── */
+.table-wrap {
+  background: var(--surface); border-radius: var(--radius);
+  border: 1px solid var(--border); overflow: hidden;
+}
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th {
+  background: #f8fafc; font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted);
+  padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border);
+}
+td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+.badge {
+  display: inline-block; padding: 3px 9px; border-radius: 20px;
+  font-size: 12px; font-weight: 500;
+  background: #eff6ff; color: #1d4ed8;
+}
+.log-content {
+  font-size: 12px; color: var(--muted);
+  max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ── Modal ── */
+.overlay {
+  position: fixed; inset: 0; background: rgba(15,23,42,0.45);
+  display: none; align-items: center; justify-content: center; z-index: 100;
+}
+.overlay.open { display: flex; }
+.modal {
+  background: var(--surface); border-radius: 16px; padding: 28px;
+  width: 460px; max-width: 95vw; max-height: 90vh;
+  overflow-y: auto; box-shadow: 0 24px 64px rgba(0,0,0,0.18);
+}
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.modal-title { font-size: 17px; font-weight: 700; }
+.modal-sub   { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.modal-close {
+  background: none; border: none; font-size: 18px;
+  cursor: pointer; color: var(--muted); padding: 2px 6px; border-radius: 5px;
+}
+.modal-close:hover { background: var(--bg); }
+.modal-footer {
+  display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px;
+  padding-top: 16px; border-top: 1px solid var(--border);
+}
+
+/* ── Form ── */
+.form-group { margin-bottom: 16px; }
+.form-label {
+  display: block; font-size: 12px; font-weight: 600;
+  color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px;
+}
+input[type=text], input[type=number], input[type=date], select {
+  width: 100%; padding: 10px 12px;
+  border: 1px solid var(--border); border-radius: 8px;
+  font-size: 14px; font-family: inherit; color: var(--text);
+  background: #fff; outline: none; transition: border-color 0.1s;
+}
+input:focus, select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+.btn-cancel {
+  padding: 10px 18px; border-radius: 8px;
+  background: var(--bg); color: var(--muted);
+  border: 1px solid var(--border); font-size: 14px;
+  cursor: pointer; font-family: inherit;
+}
+.btn-submit {
+  padding: 10px 22px; border-radius: 8px;
+  background: var(--primary); color: #fff;
+  border: none; font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+}
+.btn-submit:hover { background: var(--primary-d); }
+
+/* ── Toast ── */
+.toast-wrap {
+  position: fixed; bottom: 20px; right: 20px;
+  display: flex; flex-direction: column; gap: 8px; z-index: 200;
+}
+.toast {
+  padding: 11px 16px; border-radius: 9px; font-size: 13.5px;
+  display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  animation: toastIn 0.2s ease;
+}
+.toast-ok  { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+.toast-err { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+@keyframes toastIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+.empty { padding: 36px; text-align: center; color: var(--muted); }
+.loading { padding: 28px; text-align: center; color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- ===== 로그인 화면 ===== -->
+<div id="screen-login">
+  <div class="login-card">
+    <div class="login-logo">🏫</div>
+    <div class="login-title">학급 경제 시스템</div>
+    <div class="login-sub">내 이름을 선택해 시작하세요</div>
+    <select class="login-select" id="login-select">
+      <option value="">이름을 선택하세요…</option>
+    </select>
+    <button class="btn-login" onclick="doLogin()">시작하기</button>
+  </div>
+</div>
+
+<!-- ===== 학생 앱 화면 ===== -->
+<div id="screen-app">
+  <header class="app-header">
+    <div class="app-header-left">🏫 학급 경제 시스템</div>
+    <div class="app-header-right">
+      <span id="header-name" style="font-size:14px;opacity:0.85"></span>
+      <button class="logout-btn" onclick="doLogout()">나가기</button>
+    </div>
+  </header>
+
+  <div class="app-content">
+
+    <!-- 프로필 카드 -->
+    <div class="profile-card" id="profile-card">
+      <div class="profile-avatar" id="profile-avatar">👤</div>
+      <div style="flex:1">
+        <div class="profile-name" id="profile-name">—</div>
+        <div class="profile-job" id="profile-job">직업 없음</div>
+        <div class="profile-stats">
+          <div>
+            <div class="pstat-value" id="profile-balance">0</div>
+            <div class="pstat-label">잔고 (P)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 내 직업 행위 -->
+    <div class="section">
+      <div class="section-title">📝 장부 작성</div>
+      <div id="actions-area"><div class="loading">로드 중…</div></div>
+    </div>
+
+    <!-- 활동 이력 -->
+    <div class="section">
+      <div class="section-title">📋 내 활동 이력</div>
+      <div id="logs-area"><div class="loading">로드 중…</div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== 토스트 ===== -->
+<div class="toast-wrap" id="toasts"></div>
+
+<!-- ===== MODAL: 장부 작성 ===== -->
+<div class="overlay" id="modal-form">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="mf-title">장부 작성</div>
+        <div class="modal-sub" id="mf-sub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="mf-fields"></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">취소</button>
+      <button class="btn-submit" onclick="submitForm()">제출</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────── State ───────────────────────────
+let me       = null;   // 현재 학생 객체
+let myJob    = null;   // 현재 직업 객체
+let myActions = [];    // job-actions 목록
+let curJaid  = null;   // 현재 작성 중인 job-action id
+
+// ─────────────────────────── API ───────────────────────────
+async function api(method, url, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body !== undefined) opts.body = JSON.stringify(body);
+  const res = await fetch(url, opts);
+  if (!res.ok) {
+    const txt = await res.text();
+    let msg = txt;
+    try { msg = JSON.parse(txt)?.message || txt; } catch {}
+    throw new Error(msg);
+  }
+  const txt = await res.text();
+  return txt ? JSON.parse(txt) : null;
+}
+
+// ─────────────────────────── Toast ───────────────────────────
+function toast(msg, isErr = false) {
+  const w = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className = `toast ${isErr ? 'toast-err' : 'toast-ok'}`;
+  t.textContent = (isErr ? '✕  ' : '✓  ') + msg;
+  w.appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+function fmtDate(dt) {
+  if (!dt) return '—';
+  const d = new Date(dt);
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+}
+function fmtContent(c) {
+  if (!c) return '—';
+  if (typeof c === 'object') return Object.entries(c).map(([k,v]) => `${k}: ${v}`).join(' · ');
+  return String(c);
+}
+
+// ─────────────────────────── Login ───────────────────────────
+async function initLogin() {
+  try {
+    const students = await api('GET', '/api/students');
+    const sel = document.getElementById('login-select');
+    students.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.id;
+      opt.textContent = s.name;
+      sel.appendChild(opt);
+    });
+  } catch (e) {
+    toast('학생 목록 로드 실패: ' + e.message, true);
+  }
+}
+
+async function doLogin() {
+  const sel = document.getElementById('login-select');
+  if (!sel.value) { toast('이름을 선택하세요', true); return; }
+  try {
+    const students = await api('GET', '/api/students');
+    me = students.find(s => s.id === Number(sel.value));
+    if (!me) { toast('학생 정보를 찾을 수 없습니다', true); return; }
+    document.getElementById('screen-login').style.display = 'none';
+    document.getElementById('screen-app').style.display = 'block';
+    document.getElementById('header-name').textContent = me.name + '님';
+    await loadStudentApp();
+  } catch (e) {
+    toast('로그인 실패: ' + e.message, true);
+  }
+}
+
+function doLogout() {
+  me = null; myJob = null; myActions = [];
+  document.getElementById('screen-login').style.display = 'flex';
+  document.getElementById('screen-app').style.display = 'none';
+  document.getElementById('login-select').value = '';
+}
+
+// ─────────────────────────── App ───────────────────────────
+async function loadStudentApp() {
+  // 프로필
+  document.getElementById('profile-name').textContent = me.name;
+  document.getElementById('profile-balance').textContent = (me.balance ?? 0).toLocaleString();
+
+  // 직업 로드
+  if (me.currentJobId) {
+    try {
+      const jobs = await api('GET', '/api/jobs');
+      myJob = jobs.find(j => j.id === me.currentJobId);
+      if (myJob) {
+        const a = myJob.attributes || {};
+        document.getElementById('profile-job').textContent = `${a.icon ?? '💼'} ${myJob.name}`;
+        document.getElementById('profile-avatar').textContent = a.icon ?? '💼';
+        document.getElementById('profile-avatar').style.background =
+          a.color ? a.color + '22' : '#eff6ff';
+      }
+    } catch {}
+  } else {
+    document.getElementById('profile-job').textContent = '직업 없음';
+  }
+
+  await Promise.all([loadActions(), loadLogs()]);
+}
+
+// ─────────────────────────── Actions ───────────────────────────
+async function loadActions() {
+  const el = document.getElementById('actions-area');
+  if (!me.currentJobId) {
+    el.innerHTML = '<div class="no-job-box"><div class="no-job-icon">💼</div>배정된 직업이 없습니다.<br>선생님께 직업 배정을 요청하세요.</div>';
+    return;
+  }
+  el.innerHTML = '<div class="loading">로드 중…</div>';
+  try {
+    myActions = await api('GET', `/api/jobs/${me.currentJobId}/actions`);
+    if (!myActions.length) {
+      el.innerHTML = '<div class="no-job-box"><div class="no-job-icon">📝</div>이 직업에 등록된 장부가 없습니다.</div>';
+      return;
+    }
+    el.innerHTML = `<div class="action-grid">${myActions.map(ja => `
+      <div class="action-card">
+        <div class="action-card-title">${esc(ja.actionConfig?.title ?? ja.displayName)}</div>
+        <div class="action-card-code">${esc(ja.actionCode)}</div>
+        <button class="action-card-btn" onclick="openForm(${ja.id})">📝 작성하기</button>
+      </div>`).join('')}
+    </div>`;
+  } catch (e) {
+    el.innerHTML = `<div class="no-job-box">로드 실패: ${esc(e.message)}</div>`;
+  }
+}
+
+// ─────────────────────────── Form Modal ───────────────────────────
+async function openForm(jaid) {
+  curJaid = jaid;
+  const modal = document.getElementById('modal-form');
+  const fieldsEl = document.getElementById('mf-fields');
+  fieldsEl.innerHTML = '<div class="loading">로드 중…</div>';
+  modal.classList.add('open');
+
+  try {
+    const data   = await api('GET', `/api/job-actions/${jaid}`);
+    const fields = data.actionConfig?.fields ?? [];
+
+    document.getElementById('mf-title').textContent =
+      data.actionConfig?.title ?? data.displayName;
+    document.getElementById('mf-sub').textContent =
+      data.actionCode + (myJob ? ` · ${myJob.name}` : '');
+
+    if (!fields.length) {
+      fieldsEl.innerHTML = '<p style="color:var(--muted);font-size:14px">입력 필드가 없습니다. 바로 제출하세요.</p>';
+      return;
+    }
+
+    fieldsEl.innerHTML = '';
+    fields.forEach(f => {
+      const name = f.name, type = f.type || 'text';
+      let inp;
+      if (type === 'select') {
+        inp = `<select class="cf" data-key="${esc(name)}">${(f.options ?? []).map(o => `<option>${esc(o)}</option>`).join('')}</select>`;
+      } else if (type === 'date') {
+        const today = new Date().toISOString().split('T')[0];
+        inp = `<input type="date" class="cf" data-key="${esc(name)}" value="${today}">`;
+      } else if (type === 'number') {
+        inp = `<input type="number" class="cf" data-key="${esc(name)}"
+          ${f.min !== undefined ? `min="${f.min}"` : ''}
+          ${f.max !== undefined ? `max="${f.max}"` : ''}
+          placeholder="${esc(name)}">`;
+      } else {
+        inp = `<input type="text" class="cf" data-key="${esc(name)}" placeholder="${esc(name)} 입력">`;
+      }
+      const g = document.createElement('div');
+      g.className = 'form-group';
+      g.innerHTML = `<label class="form-label">${esc(name)}</label>${inp}`;
+      fieldsEl.appendChild(g);
+    });
+  } catch (e) {
+    fieldsEl.innerHTML = `<p style="color:#ef4444">로드 실패: ${esc(e.message)}</p>`;
+  }
+}
+
+function closeModal() {
+  document.getElementById('modal-form').classList.remove('open');
+  curJaid = null;
+}
+document.getElementById('modal-form').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-form')) closeModal();
+});
+
+async function submitForm() {
+  if (!curJaid) return;
+  const content = {};
+  document.querySelectorAll('#mf-fields .cf').forEach(el => {
+    content[el.dataset.key] = el.value.trim();
+  });
+  try {
+    await api('POST', '/api/activity-logs', {
+      studentId:   me.id,
+      jobActionId: curJaid,
+      content,
+    });
+    closeModal();
+    toast('장부가 제출되었습니다!');
+    loadLogs();
+  } catch (e) { toast('제출 실패: ' + e.message, true); }
+}
+
+// ─────────────────────────── Logs ───────────────────────────
+async function loadLogs() {
+  const el = document.getElementById('logs-area');
+  try {
+    const logs = await api('GET', `/api/activity-logs?studentId=${me.id}`);
+    if (!logs.length) {
+      el.innerHTML = '<div class="table-wrap"><div class="empty">아직 작성한 장부가 없습니다.</div></div>';
+      return;
+    }
+    el.innerHTML = `
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>장부</th><th>내용</th><th>날짜</th></tr></thead>
+          <tbody>${[...logs].reverse().map(log => `
+            <tr>
+              <td><span class="badge">${esc(log.actionCode ?? `#${log.jobActionId}`)}</span></td>
+              <td><div class="log-content" title="${esc(fmtContent(log.content))}">${esc(fmtContent(log.content))}</div></td>
+              <td style="color:var(--muted);font-size:12px;white-space:nowrap">${fmtDate(log.createdAt)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  } catch (e) {
+    el.innerHTML = `<div class="table-wrap"><div class="empty">로드 실패: ${esc(e.message)}</div></div>`;
+  }
+}
+
+// ─────────────────────────── Init ───────────────────────────
+initLogin();
+</script>
+</body>
+</html>

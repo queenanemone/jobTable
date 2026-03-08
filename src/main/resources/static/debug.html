@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>API Debug</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: monospace; display: flex; height: 100vh; background: #1e1e1e; color: #d4d4d4; }
+
+#sidebar { width: 210px; min-width: 210px; background: #252526; overflow-y: auto; border-right: 1px solid #3c3c3c; padding: 8px 0; }
+.nav-group { margin-bottom: 4px; }
+.nav-group-title { padding: 6px 12px; font-size: 11px; text-transform: uppercase; color: #858585; letter-spacing: 1px; }
+.nav-item { display: flex; align-items: center; gap: 6px; padding: 5px 10px; cursor: pointer; font-size: 11px; border-left: 2px solid transparent; white-space: nowrap; overflow: hidden; }
+.nav-item:hover { background: #2a2d2e; }
+.nav-item.active { background: #37373d; border-left-color: #007acc; }
+.nav-item span.label { overflow: hidden; text-overflow: ellipsis; }
+.mb { font-size: 10px; font-weight: bold; padding: 1px 4px; border-radius: 2px; min-width: 40px; text-align: center; flex-shrink: 0; }
+.GET    { background:#1a4d2e; color:#4ec97f; }
+.POST   { background:#1a3560; color:#5c9cf5; }
+.PUT    { background:#4d3000; color:#f5a623; }
+.PATCH  { background:#35186e; color:#b27cf5; }
+.DELETE { background:#5a1515; color:#f55c5c; }
+
+#main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.section { display:none; flex:1; flex-direction:column; overflow:hidden; padding:16px; gap:10px; }
+.section.active { display:flex; }
+.section-title { font-size:13px; color:#9cdcfe; padding-bottom:8px; border-bottom:1px solid #3c3c3c; display:flex; align-items:center; gap:8px; }
+
+.form-area { display:flex; flex-direction:column; gap:7px; }
+.form-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.form-label { font-size:11px; color:#858585; width:90px; flex-shrink:0; }
+input[type=text], input[type=number], input[type=color], select {
+    background:#3c3c3c; border:1px solid #555; color:#d4d4d4;
+    padding:4px 8px; font-family:monospace; font-size:12px; border-radius:3px; outline:none;
+}
+input[type=text]:focus, input[type=number]:focus, select:focus { border-color:#007acc; }
+input[type=text] { width:220px; }
+input[type=number] { width:100px; }
+input[type=color] { width:50px; height:26px; padding:2px; cursor:pointer; }
+
+.btn-run  { background:#007acc; color:#fff; border:none; padding:5px 16px; font-family:monospace; font-size:12px; cursor:pointer; border-radius:3px; }
+.btn-run:hover { background:#005a9e; }
+.btn-add  { background:#2d4a2d; color:#4ec97f; border:1px solid #3a6b3a; padding:3px 10px; font-size:11px; cursor:pointer; border-radius:3px; font-family:monospace; }
+.btn-add:hover { background:#3a5f3a; }
+.btn-rm   { background:none; border:none; color:#666; cursor:pointer; font-size:14px; padding:0 4px; }
+.btn-rm:hover { color:#f55c5c; }
+.btn-load { background:#2d3a4a; color:#5c9cf5; border:1px solid #3a4f6b; padding:3px 10px; font-size:11px; cursor:pointer; border-radius:3px; font-family:monospace; }
+.btn-load:hover { background:#3a4f6b; }
+
+.builder-box { display:flex; flex-direction:column; gap:5px; padding:8px; background:#2a2a2a; border-radius:4px; border:1px solid #3c3c3c; }
+.builder-sub { font-size:11px; color:#858585; margin-bottom:2px; }
+.kv-row, .field-row { display:flex; align-items:center; gap:6px; margin-bottom:3px; }
+.kv-row input.kv-key { width:110px; }
+.kv-row input.kv-val { width:150px; }
+.field-row .fn   { width:120px; }
+.field-row .ft   { width:80px; background:#3c3c3c; border:1px solid #555; color:#d4d4d4; padding:4px 6px; font-family:monospace; font-size:12px; border-radius:3px; }
+.field-row .fopts{ width:190px; }
+.field-row .fnum { width:60px; }
+.field-type-hint { font-size:10px; color:#555; margin-left:4px; }
+
+.divider { height:1px; background:#3c3c3c; }
+
+.response-area { flex:1; display:flex; flex-direction:column; overflow:hidden; min-height:0; }
+.response-header { display:flex; align-items:center; gap:10px; padding:4px 0; font-size:12px; min-height:24px; }
+.status-badge { padding:2px 8px; border-radius:3px; font-weight:bold; font-size:12px; }
+.s2 { background:#1a4d2e; color:#4ec97f; }
+.s4 { background:#5a1515; color:#f55c5c; }
+.s5 { background:#4a1010; color:#ff8080; }
+.resp-time { color:#858585; font-size:11px; }
+pre.resp-body { flex:1; overflow:auto; background:#0d1117; border:1px solid #3c3c3c; border-radius:3px; padding:10px; font-size:12px; line-height:1.5; white-space:pre-wrap; word-break:break-all; min-height:0; }
+
+.jk { color:#9cdcfe; } .js { color:#ce9178; } .jn { color:#b5cea8; } .jb { color:#569cd6; }
+
+.dyn-fields { display:flex; flex-direction:column; gap:6px; padding:8px; background:#2a2a2a; border-radius:4px; border:1px solid #3c3c3c; }
+.dyn-hint { font-size:11px; color:#858585; font-style:italic; }
+.hint-sm { font-size:10px; color:#555; margin-left:98px; }
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+    <div class="nav-group">
+        <div class="nav-group-title">Jobs</div>
+        <div class="nav-item active" onclick="show('job-list',this)"><span class="mb GET">GET</span><span class="label">/api/jobs</span></div>
+        <div class="nav-item" onclick="show('job-get',this)"><span class="mb GET">GET</span><span class="label">/api/jobs/{id}</span></div>
+        <div class="nav-item" onclick="show('job-create',this)"><span class="mb POST">POST</span><span class="label">/api/jobs</span></div>
+        <div class="nav-item" onclick="show('job-update',this)"><span class="mb PUT">PUT</span><span class="label">/api/jobs/{id}</span></div>
+        <div class="nav-item" onclick="show('job-delete',this)"><span class="mb DELETE">DELETE</span><span class="label">/api/jobs/{id}</span></div>
+        <div class="nav-item" onclick="show('job-actions-get',this)"><span class="mb GET">GET</span><span class="label">/api/jobs/{id}/actions</span></div>
+        <div class="nav-item" onclick="show('job-actions-post',this)"><span class="mb POST">POST</span><span class="label">/api/jobs/{id}/actions</span></div>
+    </div>
+    <div class="nav-group">
+        <div class="nav-group-title">Actions</div>
+        <div class="nav-item" onclick="show('action-list',this)"><span class="mb GET">GET</span><span class="label">/api/actions</span></div>
+        <div class="nav-item" onclick="show('action-get',this)"><span class="mb GET">GET</span><span class="label">/api/actions/{id}</span></div>
+        <div class="nav-item" onclick="show('action-create',this)"><span class="mb POST">POST</span><span class="label">/api/actions</span></div>
+        <div class="nav-item" onclick="show('action-delete',this)"><span class="mb DELETE">DELETE</span><span class="label">/api/actions/{id}</span></div>
+    </div>
+    <div class="nav-group">
+        <div class="nav-group-title">Students</div>
+        <div class="nav-item" onclick="show('student-list',this)"><span class="mb GET">GET</span><span class="label">/api/students</span></div>
+        <div class="nav-item" onclick="show('student-get',this)"><span class="mb GET">GET</span><span class="label">/api/students/{id}</span></div>
+        <div class="nav-item" onclick="show('student-create',this)"><span class="mb POST">POST</span><span class="label">/api/students</span></div>
+        <div class="nav-item" onclick="show('student-job',this)"><span class="mb PATCH">PATCH</span><span class="label">/api/students/{id}/job</span></div>
+    </div>
+    <div class="nav-group">
+        <div class="nav-group-title">Activity Logs</div>
+        <div class="nav-item" onclick="show('log-create',this)"><span class="mb POST">POST</span><span class="label">/api/activity-logs</span></div>
+        <div class="nav-item" onclick="show('log-by-student',this)"><span class="mb GET">GET</span><span class="label">?studentId</span></div>
+        <div class="nav-item" onclick="show('log-by-action',this)"><span class="mb GET">GET</span><span class="label">/by-job-action</span></div>
+    </div>
+    <div class="nav-group">
+        <div class="nav-group-title">Workflow</div>
+        <div class="nav-item" onclick="show('wf-list',this)"><span class="mb GET">GET</span><span class="label">/api/workflows</span></div>
+        <div class="nav-item" onclick="show('wf-create',this)"><span class="mb POST">POST</span><span class="label">/api/workflows</span></div>
+        <div class="nav-item" onclick="show('wf-delete',this)"><span class="mb DELETE">DELETE</span><span class="label">/api/workflows/{id}</span></div>
+    </div>
+</div>
+
+<div id="main">
+
+<!-- JOBS -->
+<div id="job-list" class="section active">
+    <div class="section-title"><span class="mb GET">GET</span>/api/jobs — 직업 목록 조회</div>
+    <div class="form-area"><div class="form-row"><button class="btn-run" onclick="go('GET','/api/jobs')">실행</button></div></div>
+    <div class="response-area"><div class="response-header" id="job-list-h"></div><pre class="resp-body" id="job-list-r"></pre></div>
+</div>
+
+<div id="job-get" class="section">
+    <div class="section-title"><span class="mb GET">GET</span>/api/jobs/{id} — 직업 단건 조회</div>
+    <div class="form-area">
+        <div class="form-row"><span class="form-label">직업 ID</span><input type="number" id="jg-id" placeholder="1"></div>
+        <div class="form-row"><button class="btn-run" onclick="go('GET',`/api/jobs/${v('jg-id')}`)">실행</button></div>
+    </div>
+    <div class="response-area"><div class="response-header" id="job-get-h"></div><pre class="resp-body" id="job-get-r"></pre></div>
+</div>
+
+<div id="job-create" class="section">
+    <div class="section-title"><span class="mb POST">POST</span>/api/jobs — 직업 생성</div>
+    <div class="form-area">
+        <div class="form-row"><span class="form-label">직업명 *</span><input type="text" id="jc-name" placeholder="국세청"></div>
+        <div class="form-row"><span class="form-label">기본 월급</span><input type="number" id="jc-salary" placeholder="1000"></div>
+        <div class="divider"></div>
+        <div class="builder-box">
+            <div class="builder-sub">attributes (직업 메타데이터)</div>
+            <div class="form-row"><span class="form-label">색상</span><input type="color" id="jc-color" value="#007acc"><input type="text" id="jc-color-text" placeholder="#007acc" style="width:80px"></div>
+            <div class="form-row"><span class="form-label">아이콘</span><input type="text" id="jc-icon" placeholder="🏛" style="width:60px"></div>
+            <div class="form-row"><span class="form-label">설명</span><input type="text" id="jc-desc" placeholder="직업 설명"></div>
+            <div class="form-row"><span class="form-label">최대 인원</span><input type="number" id="jc-maxcount" placeholder="1"></div>
+            <div class="builder-sub" style="margin-top:4px">추가 속성 (자유 형식)</div>
+            <div id="jc-kv"></div>
+            <div><button class="btn-add" onclick="addKv('jc-kv')">+ 속성 추가</button></div>
+        </div>
+        <div class="form-row"><button class="btn-run" onclick="createJob()">실행</button></div>
+    </div>
+    <div class="response-area"><div class="response-header" id="job-create-h"></div><pre class="resp-body" id="job-create-r"></pre></div>
+</div>
+
+<div id="job-update" class="section">
+    <div class="section-title"><span class="mb PUT">PUT</span>/api/jobs/{id} — 직업 수정</div>
+    <div class="form-area">
+        <div class="form-row"><span class="form-label">직업 ID *</span><input type="number" id="ju-id" placeholder="1"></div>
+        <div class="form-row"><span class="form-label">직업명 *</span><input type="text" id="ju-name" placeholder="수정된 직업명"></div>
+        <div class="form-row"><span class="form-label">기본 월급</span><input type="number" id="ju-salary" placeholder="2000"></div>
+        <div class="divider"></div>
+        <div class="builder-box">
+            <div class="builder-sub">attributes</div>
+            <div class="form-row"><span class="form-label">색상</span><input type="color" id="ju-color" value="#007acc"><input type="text" id="ju-color-text" placeholder="#007acc" style="width:80px"></div>
+            <div class="form-row"><span class="form-label">아이콘</span><input type="text" id="ju-icon" placeholder="🏛" style="width:60px"></div>
+            <div class="form-row"><span class="form-label">설명</span><input type="text" id="ju-desc" placeholder="직업 설명"></div>
+            <div class="form-row"><span class="form-label">최대 인원</span><input type="number" id="ju-maxcount" placeholder="1"></div>
+            <div class="builder-sub" style="margin-top:4px">추가 속성</div>
+            <div id="ju-kv"></div>
+            <div><button class="btn-add" onclick="addKv('ju-kv')">+ 속성 추가</button></div>
+        </div>
+        <div class="form-row"><button class="btn-run" onclick="updateJob()">실행</button></div>
+    </div>
+    <div class="response-area"><div class="response-header" id="job-update-h"></div><pre class="resp-body" id="job-update-r"></pre></div>
+</div>
+
+<div id="job-delete" class="section">
+    <div class="section-title"><span class="mb DELETE">DELETE</span>/api/jobs/{id} — 직업 삭제</div>
+    <div class="form-area">
+        <div class="form-row"><span class="form-label">직업 ID</span><input type="number" id="jd-id" placeholder="1"></div>
+        <div class="form-row"><button class="btn-run" onclick="go('DELETE',`/api/jobs/${v('jd-id')}`)">실행</button></div>
+    </div>
+    <div class="response-area"><div class="response-header" id="job-delete-h"></div><pre class="resp-body" id="job-delete-r"></pre></div>
+</div>
+
+<div id="job-actions-get" class="section">
+    <div class="section-title"><span class="mb GET">GET</span>/api/jobs/{id}/actions — 직업별 행위 스키마 조회</div>
+    <div class="form-area">
+        <div class="form-row"><span class="form-label">직업 ID</span><input type="number" id="jag-id" placeholder="1"></div>
+        <div class="form-row"><button class="btn-run" onclick="go('GET',`/api/jobs/${v('jag-id')}/actions`)">실행</button></div>
+    </div>
+    <div class="response-area"><div class="response-header" id="job-actions-get-h"></div><pre class="resp-body" id="job-actions-get-r"></pre></div>
+</div>
+
+<div id="job-actions-post" class="section">
+    <div class="section-title"><span class="mb POST">POST</span>/api/jobs/{id}/actions — 직업에 행위 연결</div>
+    <div class="form-area">
+        <div class="form-row"><span class="form-label">직업 ID *</span><input type="number" id="jap-jid" placeholder="1"></div>
+        <div class="form-row"><span class="form-label">행위 ID *</span><input type="number" id="jap-aid" placeholder="1"></div>
+        <div class="divider"></div>
+        <div class="builder-box">
+            <div class="builder-sub">actionConfig — 입력 폼 정의</div>
+            <div class="form-row"><span class="form-label">장부 제목</span><input type="text" id="jap-title" placeholder="세금 장부"></div>
+            <div class="builder-sub" style="margin-top:4px">입력 필드 목록 <span style="color:#555">(이 순서대로 학생 입력 UI에 표시됨)</span></div>
+            <div style="font-size:10px;color:#555;margin-bottom:4px">
+                text=일반텍스트 · number=숫자(min/max) · date=날짜 · select=선택지(쉼표 구분)
+            </div>
+            <div id="jap-fields"></div>
+            <div><button class="btn-add" onclick="addField('jap-fields')">+ 필드 추가</button></div>
+        </div>
+        <div class="form-row"><button class="btn-run" onclick="addJobAction()">실행</button></div>
+    </div>
+    <div class="response-area"><div class="response-header" id="job-actions-post-h"></div><pre class="resp-body" id="job-actions-post-r"></pre></div>
+</div>
+
+<!-- ACTIONS -->
+<div id="action-list" class="section">
+    <div class="section-title"><span class="mb GET">GET</span>/api/actions — 행위 목록 조회</div>
+    <div class="form-area"><div class="form-row"><button class="btn-run" onclick="go('GET','/api/actions')">실행</button></div></div>
+    <div class="response-area"><div class="response-header" id="action-list-h"></div><pre class="resp-body" id="action-list-r"></pre></div>
+</div>
+
+<div id="action-get" class="section">
+    <div class="section-title"><span class="mb GET">GET</span>/api/actions/{id} — 행위 단건 조회</div>
+    <div class="form-area">
+        <div class="form-row"><span class="form-label">행위 ID</span><input type="number" id="ag-id" placeholder="1"></div>
+        <div class="form-row"><button class="btn-run" onclick="go('GET',`/api/actions/${v('ag-id')}`)">실행</button></div>
+    </div>
+    <div class="response-area"><div class="response-header" id="action-get-h"></div><pre class="resp-body" id="action-get-r"></pre></div>
+</div>
+
+<div id="action-create" class="section">
+    <div class="section-title"><span class="mb POST">POST</span>/api/actions — 행위 생성</div>
+    <div class="form-area">
+        <div class="form-row"><span class="form-label">코드 *</span><input type="text" id="ac-code" placeholder="LEDGER"></div>
+        <div class="hint-sm">자동 대문자 저장 · 예: LEDGER, CHECKLIST, REPORT</div>
+        <div class="form-row"><span class="form-label">표시명 *</span><input type="text" id="ac-name" placeholder="장부 작성"></div>
+        <div class="form-row"><button class="btn-run" onclick="go('POST','/api/actions',{actionCode:v('ac-code'),displayName:v('ac-name')})">실행</button></div>
+    </div>
+    <div class="response-area"><div class="response-header" id="action-create-h"></div><pre class="resp-body" id="action-create-r"></pre></div>
+</div>
+
+<div id="action-delete" class="section">
+    <div class="section-title"><span class="mb DELETE">DELETE</span>/api/actions/{id} — 행위 삭제</div>
+    <div class="form-area">
+        <div class="form-row"><span class="form-label">행위 ID</span><input type="number" id="ad-id" placeholder="1"></div>
+        <div class="form-row"><button class="btn-run" onclick="go('DELETE',`/api/actions/${v('ad-id')}`)">실행</button></div>
+    </div>
+    <div class="response-area"><div class="response-header" id="action-delete-h"></div><pre class="resp-body" id="action-delete-r"></pre></div>
+</div>
+
+<!-- STUDENTS -->
+<div id="student-list" class="section">
+    <div class="section-title"><span class="mb GET">GET</span>/api/students — 학생 목록 조회</div>
+    <div class="form-area"><div class="form-row"><button class="btn-run" onclick="go('GET','/api/students')">실행</button></div></div>
+    <div class="response-area"><div class="response-header" id="student-list-h"></div><pre class="resp-body" id="student-list-r"></pre></div>
+</div>
+
+<div id="student-get" class="section">
+    <div class="section-title"><span class="mb GET">GET</span>/api/students/{id} — 학생 단건 조회</div>
+    <div class="form-area">
+        <div class="form-row"><span class="form-label">학생 ID</span><input type="number" id="sg-id" placeholder="1"></div>
+        <div class="form-row"><button class="btn-run" onclick="go('GET',`/api/students/${v('sg-id')}`)">실행</button></div>
+    </div>
+    <div class="response-area"><div class="response-header" id="student-get-h"></div><pre class="resp-body" id="student-get-r"></pre></div>
+</div>
+
+<div id="student-create" class="section">
+    <div class="section-title"><span class="mb POST">POST</span>/api/students — 학생 생성</div>
+    <div class="form-area">
+        <div class="form-row"><span class="form-label">이름 *</span><input type="text" id="sc-name" placeholder="홍길동"></div>
+        <div class="form-row"><span class="form-label">직업 ID</span><input type="number" id="sc-job" placeholder="(선택)"></div>
+        <div class="form-row"><span class="form-label">잔고</span><input type="number" id="sc-bal" placeholder="0"></div>
+        <div class="form-row"><button class="btn-run" onclick="createStudent()">실행</button></div>
+    </div>
+    <div class="response-area"><div class="response-header" id="student-create-h"></div><pre class="resp-body" id="student-create-r"></pre></div>
+</div>
+
+<div id="student-job" class="section">
+    <div class="section-title"><span class="mb PATCH">PATCH</span>/api/students/{id}/job — 직업 변경</div>
+    <div class="form-area">
+        <div class="form-row"><span class="form-label">학생 ID *</span><input type="number" id="sj-sid" placeholder="1"></div>
+        <div class="form-row"><span class="form-label">직업 ID</span><input type="number" id="sj-jid" placeholder="비워두면 직업 해제"></div>
+        <div class="form-row"><button class="btn-run" onclick="assignJob()">실행</button></div>
+    </div>
+    <div class="response-area"><div class="response-header" id="student-job-h"></div><pre class="resp-body" id="student-job-r"></pre></div>
+</div>
+
+<!-- ACTIVITY LOGS -->
+<div id="log-create" class="section">
+    <div class="section-title"><span class="mb POST">POST</span>/api/activity-logs — 활동 로그 저장</div>
+    <div class="form-area">
+        <div class="form-row"><span class="form-label">학생 ID *</span><input type="number" id="lc-sid" placeholder="1"></div>
+        <div class="form-row">
+            <span class="form-label">행위 ID *</span>
+            <input type="number" id="lc-jaid" placeholder="1">
+            <button class="btn-load" onclick="loadSchema()">폼 불러오기</button>
+        </div>
+        <div class="dyn-fields" id="lc-fields">
+            <span class="dyn-hint">행위 ID 입력 후 "폼 불러오기" 클릭</span>
+        </div>
+        <div class="form-row"><button class="btn-run" onclick="createLog()">실행</button></div>
+    </div>
+    <div class="response-area"><div class="response-header" id="log-create-h"></div><pre class="resp-body" id="log-create-r"></pre></div>
+</div>
+
+<div id="log-by-student" class="section">
+    <div class="section-title"><span class="mb GET">GET</span>/api/activity-logs?studentId — 학생별 이력</div>
+    <div class="form-area">
+        <div class="form-row"><span class="form-label">학생 ID</span><input type="number" id="ls-sid" placeholder="1"></div>
+        <div class="form-row"><button class="btn-run" onclick="go('GET',`/api/activity-logs?studentId=${v('ls-sid')}`)">실행</button></div>
+    </div>
+    <div class="response-area"><div class="response-header" id="log-by-student-h"></div><pre class="resp-body" id="log-by-student-r"></pre></div>
+</div>
+
+<div id="log-by-action" class="section">
+    <div class="section-title"><span class="mb GET">GET</span>/api/activity-logs/by-job-action — 행위별 이력</div>
+    <div class="form-area">
+        <div class="form-row"><span class="form-label">행위 ID</span><input type="number" id="la-jaid" placeholder="1"></div>
+        <div class="form-row"><button class="btn-run" onclick="go('GET',`/api/activity-logs/by-job-action?jobActionId=${v('la-jaid')}`)">실행</button></div>
+    </div>
+    <div class="response-area"><div class="response-header" id="log-by-action-h"></div><pre class="resp-body" id="log-by-action-r"></pre></div>
+</div>
+
+<!-- WORKFLOW -->
+<div id="wf-list" class="section">
+    <div class="section-title"><span class="mb GET">GET</span>/api/workflows — 워크플로우 조회</div>
+    <div class="form-area">
+        <div class="form-row" style="gap:16px">
+            <span class="form-label">필터</span>
+            <label style="font-size:11px"><input type="radio" name="wf-f" value="all" checked onchange="toggleWfFilter(this)"> 전체</label>
+            <label style="font-size:11px"><input type="radio" name="wf-f" value="from" onchange="toggleWfFilter(this)"> From 직업</label>
+            <label style="font-size:11px"><input type="radio" name="wf-f" value="to" onchange="toggleWfFilter(this)"> To 직업</label>
+        </div>
+        <div class="form-row" id="wf-filter-row" style="display:none">
+            <span class="form-label" id="wf-filter-label">직업 ID</span>
+            <input type="number" id="wf-filter-id" placeholder="1">
+        </div>
+        <div class="form-row"><button class="btn-run" onclick="listWorkflows()">실행</button></div>
+    </div>
+    <div class="response-area"><div class="response-header" id="wf-list-h"></div><pre class="resp-body" id="wf-list-r"></pre></div>
+</div>
+
+<div id="wf-create" class="section">
+    <div class="section-title"><span class="mb POST">POST</span>/api/workflows — 워크플로우 생성</div>
+    <div class="form-area">
+        <div class="form-row"><span class="form-label">From 직업 ID *</span><input type="number" id="wc-from" placeholder="경찰 ID"></div>
+        <div class="form-row"><span class="form-label">To 직업 ID *</span><input type="number" id="wc-to" placeholder="국세청 ID"></div>
+        <div class="divider"></div>
+        <div class="form-row"><span class="form-label">문서 유형</span><input type="text" id="wc-doc" placeholder="벌금대장"></div>
+        <div class="hint-sm">예: 벌금대장 / 통계표 / 업무수행대장 / 신용평가보고서</div>
+        <div class="form-row"><span class="form-label">설명</span><input type="text" id="wc-desc" placeholder="경찰 → 국세청 벌금 신고" style="width:300px"></div>
+        <div class="form-row"><button class="btn-run" onclick="createWorkflow()">실행</button></div>
+    </div>
+    <div class="response-area"><div class="response-header" id="wf-create-h"></div><pre class="resp-body" id="wf-create-r"></pre></div>
+</div>
+
+<div id="wf-delete" class="section">
+    <div class="section-title"><span class="mb DELETE">DELETE</span>/api/workflows/{id} — 워크플로우 삭제</div>
+    <div class="form-area">
+        <div class="form-row"><span class="form-label">워크플로우 ID</span><input type="number" id="wd-id" placeholder="1"></div>
+        <div class="form-row"><button class="btn-run" onclick="go('DELETE',`/api/workflows/${v('wd-id')}`)">실행</button></div>
+    </div>
+    <div class="response-area"><div class="response-header" id="wf-delete-h"></div><pre class="resp-body" id="wf-delete-r"></pre></div>
+</div>
+
+</div>
+
+<script>
+let cur = 'job-list';
+
+function show(id, el) {
+    document.getElementById(cur).classList.remove('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    el.classList.add('active');
+    cur = id;
+}
+
+const v = id => document.getElementById(id).value.trim();
+
+function hl(json) {
+    if (typeof json !== 'string') json = JSON.stringify(json, null, 2);
+    return json.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+\.?\d*([eE][+-]?\d+)?)/g, m => {
+            if (/^"/.test(m)) return /:$/.test(m) ? `<span class="jk">${m}</span>` : `<span class="js">${m}</span>`;
+            if (/true|false|null/.test(m)) return `<span class="jb">${m}</span>`;
+            return `<span class="jn">${m}</span>`;
+        });
+}
+
+async function go(method, url, body) {
+    const hEl = document.getElementById(cur + '-h');
+    const rEl = document.getElementById(cur + '-r');
+    if (!hEl || !rEl) return;
+    rEl.innerHTML = '<span style="color:#858585">요청 중...</span>';
+    hEl.innerHTML = '';
+    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    if (body !== undefined) opts.body = JSON.stringify(body);
+    const t = Date.now();
+    try {
+        const res = await fetch(url, opts);
+        const ms  = Date.now() - t;
+        const cls = res.status < 300 ? 's2' : res.status < 500 ? 's4' : 's5';
+        hEl.innerHTML = `<span class="status-badge ${cls}">${res.status} ${res.statusText}</span><span class="resp-time">${ms}ms</span><span style="color:#555;font-size:11px">${url}</span>`;
+        const txt = await res.text();
+        try { rEl.innerHTML = hl(JSON.parse(txt)); } catch { rEl.textContent = txt || '(응답 없음)'; }
+    } catch(e) {
+        hEl.innerHTML = `<span class="status-badge s5">Network Error</span>`;
+        rEl.textContent = e.message;
+    }
+}
+
+// KV 빌더
+function addKv(cid) {
+    const d = document.createElement('div');
+    d.className = 'kv-row';
+    d.innerHTML = `<input type="text" class="kv-key" placeholder="키"><input type="text" class="kv-val" placeholder="값"><button class="btn-rm" onclick="this.parentElement.remove()">✕</button>`;
+    document.getElementById(cid).appendChild(d);
+}
+function getKv(cid) {
+    const obj = {};
+    document.querySelectorAll(`#${cid} .kv-row`).forEach(r => {
+        const k = r.querySelector('.kv-key').value.trim();
+        const w = r.querySelector('.kv-val').value.trim();
+        if (k) obj[k] = w;
+    });
+    return obj;
+}
+
+// 필드 리스트 빌더 (typed)
+function addField(cid) {
+    const d = document.createElement('div');
+    d.className = 'field-row';
+    d.style.marginBottom = '4px';
+    d.innerHTML = `
+        <input type="text" class="fn" placeholder="필드명">
+        <select class="ft" onchange="onFieldTypeChange(this)">
+            <option value="text">text</option>
+            <option value="number">number</option>
+            <option value="date">date</option>
+            <option value="select">select</option>
+        </select>
+        <span class="fextra"></span>
+        <button class="btn-rm" onclick="this.parentElement.remove()">✕</button>`;
+    document.getElementById(cid).appendChild(d);
+}
+function onFieldTypeChange(sel) {
+    const extra = sel.parentElement.querySelector('.fextra');
+    if (sel.value === 'number') {
+        extra.innerHTML = `<input type="number" class="fnum" placeholder="min"><input type="number" class="fnum fmax" placeholder="max">`;
+    } else if (sel.value === 'select') {
+        extra.innerHTML = `<input type="text" class="fopts" placeholder="옵션: O,X,기타 (쉼표 구분)">`;
+    } else {
+        extra.innerHTML = '';
+    }
+}
+function getFields(cid) {
+    return Array.from(document.querySelectorAll(`#${cid} .field-row`)).map(row => {
+        const name = row.querySelector('.fn')?.value.trim();
+        const type = row.querySelector('.ft')?.value || 'text';
+        if (!name) return null;
+        const field = { name, type };
+        if (type === 'number') {
+            const minEl = row.querySelector('.fnum');
+            const maxEl = row.querySelector('.fmax');
+            if (minEl?.value !== '') field.min = Number(minEl.value);
+            if (maxEl?.value !== '') field.max = Number(maxEl.value);
+        } else if (type === 'select') {
+            const opts = row.querySelector('.fopts')?.value || '';
+            field.options = opts.split(',').map(s => s.trim()).filter(Boolean);
+        }
+        return field;
+    }).filter(Boolean);
+}
+
+// 색상 동기화
+document.querySelectorAll('input[type=color]').forEach(el => {
+    const tid = el.id.replace('-color', '-color-text');
+    el.addEventListener('input', () => { const t = document.getElementById(tid); if(t) t.value = el.value; });
+});
+
+function buildAttrs(p) {
+    const colorText = v(`${p}-color-text`);
+    const color = colorText || document.getElementById(`${p}-color`).value;
+    const icon  = v(`${p}-icon`), desc = v(`${p}-desc`), mc = v(`${p}-maxcount`);
+    const extra = getKv(`${p}-kv`);
+    const a = { ...extra };
+    if (color && color !== '#007acc') a.color = color;
+    if (icon)  a.icon        = icon;
+    if (desc)  a.description = desc;
+    if (mc)    a.maxCount    = Number(mc);
+    return Object.keys(a).length ? a : undefined;
+}
+
+function createJob() {
+    const body = { name: v('jc-name'), baseSalary: Number(v('jc-salary')) || 0 };
+    const attrs = buildAttrs('jc'); if (attrs) body.attributes = attrs;
+    go('POST', '/api/jobs', body);
+}
+function updateJob() {
+    const body = { name: v('ju-name'), baseSalary: Number(v('ju-salary')) || 0 };
+    const attrs = buildAttrs('ju'); if (attrs) body.attributes = attrs;
+    go('PUT', `/api/jobs/${v('ju-id')}`, body);
+}
+function addJobAction() {
+    const fields = getFields('jap-fields'), title = v('jap-title');
+    const cfg = {};
+    if (title)         cfg.title  = title;
+    if (fields.length) cfg.fields = fields;
+    go('POST', `/api/jobs/${v('jap-jid')}/actions`, {
+        actionId: Number(v('jap-aid')),
+        actionConfig: Object.keys(cfg).length ? cfg : undefined
+    });
+}
+
+// 활동 로그 동적 폼 로드
+async function loadSchema() {
+    const jaid = v('lc-jaid');
+    const box  = document.getElementById('lc-fields');
+    if (!jaid) { box.innerHTML = '<span class="dyn-hint" style="color:#f55c5c">행위 ID를 입력하세요</span>'; return; }
+    box.innerHTML = '<span class="dyn-hint">불러오는 중...</span>';
+    try {
+        const res  = await fetch(`/api/job-actions/${jaid}`);
+        const data = await res.json();
+        const fields = data.actionConfig?.fields || [];
+        if (!fields.length) {
+            box.innerHTML = `<span class="dyn-hint">[${data.actionCode}] ${data.displayName} — 등록된 필드 없음</span>`;
+            return;
+        }
+        box.innerHTML = `<div style="font-size:11px;color:#858585;margin-bottom:4px">[${data.actionCode}] ${data.displayName}${data.actionConfig?.title ? ' · ' + data.actionConfig.title : ''}</div>`;
+        fields.forEach(f => {
+            const name    = typeof f === 'string' ? f : f.name;
+            const type    = typeof f === 'string' ? 'text' : (f.type || 'text');
+            const options = f.options || [];
+            const min     = f.min !== undefined ? f.min : '';
+            const max     = f.max !== undefined ? f.max : '';
+
+            let inputHtml;
+            if (type === 'select') {
+                const opts = options.map(o => `<option value="${o}">${o}</option>`).join('');
+                inputHtml = `<select class="content-field" data-key="${name}">${opts}</select>`;
+            } else if (type === 'date') {
+                inputHtml = `<input type="date" class="content-field" data-key="${name}" style="width:160px">`;
+            } else if (type === 'number') {
+                const attrs = `${min !== '' ? `min="${min}"` : ''} ${max !== '' ? `max="${max}"` : ''}`;
+                const hint  = (min !== '' || max !== '') ? `<span style="font-size:10px;color:#555">${min !== '' ? min+'~' : ''}${max !== '' ? max : ''}</span>` : '';
+                inputHtml   = `<input type="number" class="content-field" data-key="${name}" ${attrs} placeholder="${name}"> ${hint}`;
+            } else {
+                inputHtml = `<input type="text" class="content-field" data-key="${name}" placeholder="${name} 입력" style="width:220px">`;
+            }
+
+            const row = document.createElement('div');
+            row.className = 'form-row';
+            row.innerHTML = `<span class="form-label">${name}</span>${inputHtml}`;
+            box.appendChild(row);
+        });
+    } catch(e) {
+        box.innerHTML = `<span class="dyn-hint" style="color:#f55c5c">로드 실패: ${e.message}</span>`;
+    }
+}
+function createLog() {
+    const content = {};
+    document.querySelectorAll('#lc-fields .content-field').forEach(el => { content[el.dataset.key] = el.value.trim(); });
+    go('POST', '/api/activity-logs', { studentId: Number(v('lc-sid')), jobActionId: Number(v('lc-jaid')), content });
+}
+
+function createStudent() {
+    const body = { name: v('sc-name'), balance: Number(v('sc-bal')) || 0 };
+    const jid = v('sc-job'); if (jid) body.currentJobId = Number(jid);
+    go('POST', '/api/students', body);
+}
+function assignJob() {
+    const jid = v('sj-jid');
+    go('PATCH', `/api/students/${v('sj-sid')}/job`, { jobId: jid ? Number(jid) : null });
+}
+
+// 워크플로우
+function toggleWfFilter(r) {
+    const row = document.getElementById('wf-filter-row');
+    const lbl = document.getElementById('wf-filter-label');
+    if (r.value === 'all') { row.style.display = 'none'; return; }
+    row.style.display = 'flex';
+    lbl.textContent = r.value === 'from' ? 'From 직업 ID' : 'To 직업 ID';
+}
+function listWorkflows() {
+    const f = document.querySelector('input[name="wf-f"]:checked').value;
+    const fid = v('wf-filter-id');
+    if (f === 'from' && fid) go('GET', `/api/workflows?fromJobId=${fid}`);
+    else if (f === 'to' && fid) go('GET', `/api/workflows?toJobId=${fid}`);
+    else go('GET', '/api/workflows');
+}
+function createWorkflow() {
+    const body = { fromJobId: Number(v('wc-from')), toJobId: Number(v('wc-to')) };
+    const doc = v('wc-doc'), desc = v('wc-desc');
+    if (doc)  body.documentType = doc;
+    if (desc) body.description  = desc;
+    go('POST', '/api/workflows', body);
+}
+</script>
+</body>
+</html>
