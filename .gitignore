@@ -29,7 +29,10 @@ application-local.properties
 application-local.yml
 application-prod.properties
 application-prod.yml
+application-secret.properties
+application-secret.yml
 .env
+*.env.*
 
 # ===== OS =====
 .DS_Store
@@ -44,6 +47,18 @@ desktop.ini
 # ===== JVM crash logs =====
 hs_err_pid*
 replay_pid*
+
+# ===== Test / Coverage =====
+/test-results/
+/coverage/
+*.exec
+
+# ===== Static analysis =====
+.sonar/
+.sonarlint/
+
+# ===== Docker =====
+docker-compose.override.yml
 
 # ===== Misc =====
 *.ctxt
