@@ -52,6 +52,30 @@ public class StudentService {
     }
 
     @Transactional
+    public void deleteStudent(Integer studentId) {
+        if (!studentRepository.existsById(studentId)) {
+            throw new RuntimeException("학생을 찾을 수 없습니다. id=" + studentId);
+        }
+        studentRepository.deleteById(studentId);
+    }
+
+    @Transactional
+    public StudentResponse updateStudent(Integer studentId, StudentRequest request) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("학생을 찾을 수 없습니다. id=" + studentId));
+        student.setName(request.getName());
+        student.setBalance(request.getBalance() != null ? request.getBalance() : 0);
+        if (request.getCurrentJobId() != null) {
+            JobTemplate job = jobRepository.findById(request.getCurrentJobId())
+                    .orElseThrow(() -> new RuntimeException("직업을 찾을 수 없습니다. id=" + request.getCurrentJobId()));
+            student.setCurrentJob(job);
+        } else {
+            student.setCurrentJob(null);
+        }
+        return StudentResponse.from(student);
+    }
+
+    @Transactional
     public StudentResponse assignJob(Integer studentId, StudentJobRequest request) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("학생을 찾을 수 없습니다. id=" + studentId));

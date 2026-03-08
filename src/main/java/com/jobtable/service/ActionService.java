@@ -36,7 +36,17 @@ public class ActionService {
         ActionMaster action = new ActionMaster();
         action.setActionCode(request.getActionCode().toUpperCase());
         action.setDisplayName(request.getDisplayName());
+        action.setActionConfig(request.getActionConfig());
         return ActionResponse.from(actionRepository.save(action));
+    }
+
+    @Transactional
+    public ActionResponse updateAction(Integer id, ActionRequest request) {
+        ActionMaster action = actionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("행위를 찾을 수 없습니다. id=" + id));
+        action.setDisplayName(request.getDisplayName());
+        action.setActionConfig(request.getActionConfig());
+        return ActionResponse.from(action);
     }
 
     @Transactional

@@ -4,9 +4,11 @@ import com.jobtable.dto.activitylog.ActivityLogRequest;
 import com.jobtable.dto.activitylog.ActivityLogResponse;
 import com.jobtable.entity.ActivityLog;
 import com.jobtable.entity.JobAction;
+import com.jobtable.entity.JobWorkflow;
 import com.jobtable.entity.Student;
 import com.jobtable.repository.ActivityLogRepository;
 import com.jobtable.repository.JobActionRepository;
+import com.jobtable.repository.JobWorkflowRepository;
 import com.jobtable.repository.StudentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,13 +22,16 @@ public class ActivityLogService {
     private final ActivityLogRepository logRepository;
     private final StudentRepository studentRepository;
     private final JobActionRepository jobActionRepository;
+    private final JobWorkflowRepository workflowRepository;
 
     public ActivityLogService(ActivityLogRepository logRepository,
                               StudentRepository studentRepository,
-                              JobActionRepository jobActionRepository) {
+                              JobActionRepository jobActionRepository,
+                              JobWorkflowRepository workflowRepository) {
         this.logRepository = logRepository;
         this.studentRepository = studentRepository;
         this.jobActionRepository = jobActionRepository;
+        this.workflowRepository = workflowRepository;
     }
 
     @Transactional
@@ -60,6 +65,24 @@ public class ActivityLogService {
 
     public List<ActivityLogResponse> getLogsByJobAction(Integer jobActionId) {
         return logRepository.findByJobActionId(jobActionId).stream()
+                .map(ActivityLogResponse::from)
+                .toList();
+    }
+
+    public List<ActivityLogResponse> getReceivedLogs(Integer studentId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("학생을 찾을 수 없습니다. id=" + studentId));
+        if (student.getCurrentJob() == null) return List.of();
+
+        List<JobWorkflow> workflows = workflowRepository.findByToJobId(student.getCurrentJob().getId());
+        if (workflows.isEmpty()) return List.of();
+
+        List<Integer> fromJobIds = workflows.stream()
+                .map(w -> w.getFromJob().getId())
+                .distinct()
+                .toList();
+
+        return logRepository.findByJobAction_Job_IdIn(fromJobIds).stream()
                 .map(ActivityLogResponse::from)
                 .toList();
     }

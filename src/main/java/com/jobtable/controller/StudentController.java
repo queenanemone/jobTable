@@ -42,6 +42,20 @@ public class StudentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(studentService.createStudent(request));
     }
 
+    @Operation(summary = "학생 정보 수정 (이름·잔고·직업)")
+    @PutMapping("/{id}")
+    public ResponseEntity<StudentResponse> updateStudent(@PathVariable Integer id,
+                                                         @Valid @RequestBody StudentRequest request) {
+        return ResponseEntity.ok(studentService.updateStudent(id, request));
+    }
+
+    @Operation(summary = "학생 삭제")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteStudent(@PathVariable Integer id) {
+        studentService.deleteStudent(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @Operation(summary = "학생 직업 변경", description = "jobId를 null로 보내면 직업 해제")
     @PatchMapping("/{id}/job")
     public ResponseEntity<StudentResponse> assignJob(@PathVariable Integer id,

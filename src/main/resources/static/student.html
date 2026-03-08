@@ -292,6 +292,12 @@ input:focus, select:focus {
       <div id="logs-area"><div class="loading">로드 중…</div></div>
     </div>
 
+    <!-- 받은 문서 -->
+    <div class="section">
+      <div class="section-title">📨 받은 문서</div>
+      <div id="received-area"><div class="loading">로드 중…</div></div>
+    </div>
+
   </div>
 </div>
 
@@ -423,7 +429,7 @@ async function loadStudentApp() {
     document.getElementById('profile-job').textContent = '직업 없음';
   }
 
-  await Promise.all([loadActions(), loadLogs()]);
+  await Promise.all([loadActions(), loadLogs(), loadReceivedLogs()]);
 }
 
 // ─────────────────────────── Actions ───────────────────────────
@@ -543,6 +549,39 @@ async function loadLogs() {
           <tbody>${[...logs].reverse().map(log => `
             <tr>
               <td><span class="badge">${esc(log.actionCode ?? `#${log.jobActionId}`)}</span></td>
+              <td><div class="log-content" title="${esc(fmtContent(log.content))}">${esc(fmtContent(log.content))}</div></td>
+              <td style="color:var(--muted);font-size:12px;white-space:nowrap">${fmtDate(log.createdAt)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  } catch (e) {
+    el.innerHTML = `<div class="table-wrap"><div class="empty">로드 실패: ${esc(e.message)}</div></div>`;
+  }
+}
+
+// ─────────────────────────── Received Logs ───────────────────────────
+async function loadReceivedLogs() {
+  const el = document.getElementById('received-area');
+  if (!me.currentJobId) {
+    el.innerHTML = '<div class="table-wrap"><div class="empty">직업이 없어 받은 문서가 없습니다.</div></div>';
+    return;
+  }
+  try {
+    const logs = await api('GET', `/api/activity-logs/received?studentId=${me.id}`);
+    if (!logs.length) {
+      el.innerHTML = '<div class="table-wrap"><div class="empty">워크플로우로 전달받은 문서가 없습니다.</div></div>';
+      return;
+    }
+    el.innerHTML = `
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>발신 직업</th><th>작성자</th><th>장부</th><th>내용</th><th>날짜</th></tr></thead>
+          <tbody>${[...logs].reverse().map(log => `
+            <tr>
+              <td><span class="badge">${esc(log.jobName ?? '?')}</span></td>
+              <td style="font-size:13px">${esc(log.studentName)}</td>
+              <td><span class="badge">${esc(log.actionCode ?? '')}</span></td>
               <td><div class="log-content" title="${esc(fmtContent(log.content))}">${esc(fmtContent(log.content))}</div></td>
               <td style="color:var(--muted);font-size:12px;white-space:nowrap">${fmtDate(log.createdAt)}</td>
             </tr>`).join('')}

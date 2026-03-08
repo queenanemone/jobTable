@@ -20,7 +20,7 @@ public class JobActionResponse {
         r.actionId = ja.getAction().getId();
         r.actionCode = ja.getAction().getActionCode();
         r.displayName = ja.getAction().getDisplayName();
-        r.actionConfig = ja.getActionConfig();
+        r.actionConfig = ja.getAction().getActionConfig();
         return r;
     }
 

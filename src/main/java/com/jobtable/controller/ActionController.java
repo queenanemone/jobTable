@@ -41,6 +41,13 @@ public class ActionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(actionService.createAction(request));
     }
 
+    @Operation(summary = "행위 표시명 수정")
+    @PutMapping("/{id}")
+    public ResponseEntity<ActionResponse> updateAction(@PathVariable Integer id,
+                                                       @Valid @RequestBody ActionRequest request) {
+        return ResponseEntity.ok(actionService.updateAction(id, request));
+    }
+
     @Operation(summary = "행위 삭제")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAction(@PathVariable Integer id) {

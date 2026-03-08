@@ -34,6 +34,12 @@ public class JobTemplate {
     @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<JobAction> jobActions = new ArrayList<>();
 
+    @OneToMany(mappedBy = "fromJob", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<JobWorkflow> fromWorkflows = new ArrayList<>();
+
+    @OneToMany(mappedBy = "toJob", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<JobWorkflow> toWorkflows = new ArrayList<>();
+
     @OneToMany(mappedBy = "currentJob")
     private List<Student> students = new ArrayList<>();
 

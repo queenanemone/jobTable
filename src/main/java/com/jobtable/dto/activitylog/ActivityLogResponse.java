@@ -12,6 +12,7 @@ public class ActivityLogResponse {
     private String studentName;
     private Integer jobActionId;
     private String actionCode;
+    private String jobName;
     private Map<String, Object> content;
     private LocalDateTime createdAt;
 
@@ -22,6 +23,7 @@ public class ActivityLogResponse {
         r.studentName = log.getStudent().getName();
         r.jobActionId = log.getJobAction().getId();
         r.actionCode = log.getJobAction().getAction().getActionCode();
+        r.jobName = log.getJobAction().getJob().getName();
         r.content = log.getContent();
         r.createdAt = log.getCreatedAt();
         return r;
@@ -32,6 +34,7 @@ public class ActivityLogResponse {
     public String getStudentName() { return studentName; }
     public Integer getJobActionId() { return jobActionId; }
     public String getActionCode() { return actionCode; }
+    public String getJobName() { return jobName; }
     public Map<String, Object> getContent() { return content; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 }

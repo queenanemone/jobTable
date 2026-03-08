@@ -43,4 +43,10 @@ public class ActivityLogController {
     public ResponseEntity<List<ActivityLogResponse>> getLogsByJobAction(@RequestParam Integer jobActionId) {
         return ResponseEntity.ok(activityLogService.getLogsByJobAction(jobActionId));
     }
+
+    @Operation(summary = "워크플로우로 전달받은 문서 조회", description = "내 직업으로 향하는 워크플로우의 발신 직업들에서 제출된 로그")
+    @GetMapping("/received")
+    public ResponseEntity<List<ActivityLogResponse>> getReceivedLogs(@RequestParam Integer studentId) {
+        return ResponseEntity.ok(activityLogService.getReceivedLogs(studentId));
+    }
 }

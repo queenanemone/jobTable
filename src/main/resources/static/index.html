@@ -524,9 +524,40 @@ input[type=color] { height: 38px; padding: 3px; cursor: pointer; }
   </div>
 </div>
 
+<!-- ===== MODAL: 장부 편집 ===== -->
+<!-- ===== MODAL: 학생 편집 ===== -->
+<div class="overlay" id="modal-student-edit">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">학생 정보 수정</div>
+      <button class="modal-close" onclick="closeModal('modal-student-edit')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">이름 <span class="req">*</span></label>
+      <input type="text" id="mse-name" placeholder="홍길동">
+    </div>
+    <div class="form-grid2">
+      <div class="form-group">
+        <label class="form-label">잔고 (P)</label>
+        <input type="number" id="mse-balance" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">직업</label>
+        <select id="mse-job">
+          <option value="">— 직업 없음 —</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-student-edit')">취소</button>
+      <button class="btn btn-primary" onclick="submitStudentEdit()">저장</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== MODAL: 행위 추가 ===== -->
 <div class="overlay" id="modal-action">
-  <div class="modal">
+  <div class="modal" style="width:520px">
     <div class="modal-header">
       <div class="modal-title">행위 추가</div>
       <button class="modal-close" onclick="closeModal('modal-action')">✕</button>
@@ -542,9 +573,54 @@ input[type=color] { height: 38px; padding: 3px; cursor: pointer; }
         <input type="text" id="ma-name" placeholder="장부 작성">
       </div>
     </div>
+    <div class="form-group">
+      <label class="form-label">장부 제목</label>
+      <input type="text" id="ma-cfg-title" placeholder="세금 장부">
+    </div>
+    <div class="form-group">
+      <label class="form-label" style="margin-bottom:8px">
+        입력 필드
+        <span style="font-weight:400;color:var(--muted)"> — text / number(min·max) / date / select(옵션)</span>
+      </label>
+      <div class="field-builder" id="ma-fields"></div>
+      <button class="btn-add-field" style="margin-top:8px" onclick="addField('ma-fields')">+ 필드 추가</button>
+    </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-action')">취소</button>
       <button class="btn btn-primary" onclick="submitAction()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: 행위 편집 ===== -->
+<div class="overlay" id="modal-action-edit">
+  <div class="modal" style="width:520px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">행위 편집</div>
+        <div id="mae-sub" style="font-size:12px;color:var(--muted);margin-top:2px"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modal-action-edit')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">표시명 <span class="req">*</span></label>
+      <input type="text" id="mae-name" placeholder="장부 작성">
+    </div>
+    <div class="form-group">
+      <label class="form-label">장부 제목</label>
+      <input type="text" id="mae-cfg-title" placeholder="세금 장부">
+    </div>
+    <div class="form-group">
+      <label class="form-label" style="margin-bottom:8px">
+        입력 필드
+        <span style="font-weight:400;color:var(--muted)"> — text / number(min·max) / date / select(옵션)</span>
+      </label>
+      <div class="field-builder" id="mae-fields"></div>
+      <button class="btn-add-field" style="margin-top:8px" onclick="addField('mae-fields')">+ 필드 추가</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-action-edit')">취소</button>
+      <button class="btn btn-primary" onclick="submitActionEdit()">저장</button>
     </div>
   </div>
 </div>
@@ -565,29 +641,12 @@ input[type=color] { height: 38px; padding: 3px; cursor: pointer; }
     <div id="mja-list" style="margin-bottom:18px;min-height:40px"></div>
 
     <!-- 장부 연결 추가 -->
-    <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:4px">
-      <div class="form-label" style="margin-bottom:10px">장부 연결 추가</div>
-      <div class="form-grid2">
-        <div class="form-group">
-          <label class="form-label">행위 선택 <span class="req">*</span></label>
-          <select id="mja-action-sel"></select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">장부 제목</label>
-          <input type="text" id="mja-title" placeholder="세금 장부">
-        </div>
+    <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:4px;display:flex;gap:8px;align-items:flex-end">
+      <div class="form-group" style="flex:1;margin-bottom:0">
+        <label class="form-label">행위 선택 <span class="req">*</span></label>
+        <select id="mja-action-sel"></select>
       </div>
-      <div class="form-group">
-        <label class="form-label" style="margin-bottom:8px">
-          입력 필드
-          <span style="font-weight:400;color:var(--muted)"> — text / number(min·max) / date / select(옵션)</span>
-        </label>
-        <div class="field-builder" id="mja-fields"></div>
-        <button class="btn-add-field" style="margin-top:8px" onclick="addField('mja-fields')">+ 필드 추가</button>
-      </div>
-      <div style="display:flex;justify-content:flex-end">
-        <button class="btn btn-primary" onclick="submitJobAction()">연결 추가</button>
-      </div>
+      <button class="btn btn-primary" onclick="submitJobAction()">연결 추가</button>
     </div>
   </div>
 </div>
@@ -761,7 +820,7 @@ async function loadStudents() {
             </td>
             <td><strong>${(s.balance ?? 0).toLocaleString()}</strong> <span style="font-size:11px;color:var(--muted)">P</span></td>
             <td style="display:flex;gap:6px">
-              <button class="btn btn-ghost btn-sm" onclick="openAssign(${s.id})">직업 변경</button>
+              <button class="btn btn-ghost btn-sm" onclick="openStudentEdit(${s.id})">편집</button>
               <button class="btn btn-danger-soft btn-sm" onclick="deleteStudent(${s.id}, '${esc(s.name)}')">삭제</button>
             </td>
           </tr>`).join('')}
@@ -790,6 +849,36 @@ async function submitStudent() {
     await api('POST', '/api/students', body);
     closeModal('modal-student');
     toast('학생이 추가되었습니다');
+    loadStudents();
+  } catch (e) { toast('실패: ' + e.message, true); }
+}
+
+let editStudentId = null;
+
+function openStudentEdit(sid) {
+  const s = allStudents.find(s => s.id === sid);
+  if (!s) return;
+  editStudentId = sid;
+  document.getElementById('mse-name').value    = s.name ?? '';
+  document.getElementById('mse-balance').value = s.balance ?? 0;
+  const sel = document.getElementById('mse-job');
+  sel.innerHTML = '<option value="">— 직업 없음 —</option>' +
+    allJobs.map(j => `<option value="${j.id}" ${j.id === s.currentJobId ? 'selected' : ''}>${esc(j.attributes?.icon ?? '')} ${esc(j.name)}</option>`).join('');
+  openModal('modal-student-edit');
+}
+
+async function submitStudentEdit() {
+  const name = document.getElementById('mse-name').value.trim();
+  if (!name) { toast('이름을 입력하세요', true); return; }
+  const balance = Number(document.getElementById('mse-balance').value) || 0;
+  const jid     = document.getElementById('mse-job').value;
+  const body    = { name, balance };
+  if (jid) body.currentJobId = Number(jid);
+  try {
+    await api('PUT', `/api/students/${editStudentId}`, body);
+    closeModal('modal-student-edit');
+    toast('학생 정보가 수정되었습니다');
+    allStudents = await api('GET', '/api/students');
     loadStudents();
   } catch (e) { toast('실패: ' + e.message, true); }
 }
@@ -940,7 +1029,10 @@ async function loadActions() {
             <td style="color:var(--muted);font-size:12px">#${a.id}</td>
             <td><span class="badge badge-blue">${esc(a.actionCode)}</span></td>
             <td>${esc(a.displayName)}</td>
-            <td><button class="btn btn-danger-soft btn-sm" onclick="deleteAction(${a.id},'${esc(a.displayName)}')">삭제</button></td>
+            <td style="display:flex;gap:6px">
+              <button class="btn btn-ghost btn-sm" onclick="openActionEdit(${a.id})">편집</button>
+              <button class="btn btn-danger-soft btn-sm" onclick="deleteAction(${a.id},'${esc(a.displayName)}')">삭제</button>
+            </td>
           </tr>`).join('')}
         </tbody>
       </table>`;
@@ -952,19 +1044,78 @@ async function loadActions() {
 function openActionModal() {
   document.getElementById('ma-code').value = '';
   document.getElementById('ma-name').value = '';
+  document.getElementById('ma-cfg-title').value = '';
+  document.getElementById('ma-fields').innerHTML = '';
   openModal('modal-action');
 }
 async function submitAction() {
   const code = document.getElementById('ma-code').value.trim();
   const name = document.getElementById('ma-name').value.trim();
   if (!code || !name) { toast('코드와 표시명을 입력하세요', true); return; }
+  const title = document.getElementById('ma-cfg-title').value.trim();
+  const fields = getFields('ma-fields');
+  const cfg = {};
+  if (title) cfg.title = title;
+  if (fields.length) cfg.fields = fields;
   try {
-    await api('POST', '/api/actions', { actionCode: code, displayName: name });
+    await api('POST', '/api/actions', {
+      actionCode: code, displayName: name,
+      actionConfig: Object.keys(cfg).length ? cfg : null,
+    });
     closeModal('modal-action');
     toast('행위가 추가되었습니다');
     loadActions();
   } catch (e) { toast('실패: ' + e.message, true); }
 }
+let editActionId = null;
+async function openActionEdit(id) {
+  editActionId = id;
+  try {
+    const a = await api('GET', `/api/actions/${id}`);
+    document.getElementById('mae-sub').textContent = `코드: ${a.actionCode}`;
+    document.getElementById('mae-name').value = a.displayName;
+    document.getElementById('mae-cfg-title').value = a.actionConfig?.title ?? '';
+    const fieldsEl = document.getElementById('mae-fields');
+    fieldsEl.innerHTML = '';
+    (a.actionConfig?.fields ?? []).forEach(f => {
+      addField('mae-fields');
+      const row = fieldsEl.lastElementChild;
+      row.querySelector('.fname').value = f.name ?? '';
+      const sel = row.querySelector('.ftype');
+      sel.value = f.type ?? 'text';
+      onTypeChange(sel);
+      if (f.type === 'number') {
+        const nums = row.querySelectorAll('.fnum');
+        if (nums[0] && f.min !== undefined) nums[0].value = f.min;
+        if (nums[1] && f.max !== undefined) nums[1].value = f.max;
+      } else if (f.type === 'select') {
+        const optsEl = row.querySelector('.fopts');
+        if (optsEl) optsEl.value = (f.options ?? []).join(',');
+      }
+    });
+    openModal('modal-action-edit');
+  } catch (e) { toast('로드 실패: ' + e.message, true); }
+}
+async function submitActionEdit() {
+  const name = document.getElementById('mae-name').value.trim();
+  if (!name) { toast('표시명을 입력하세요', true); return; }
+  const code = document.getElementById('mae-sub').textContent.replace('코드: ', '');
+  const title = document.getElementById('mae-cfg-title').value.trim();
+  const fields = getFields('mae-fields');
+  const cfg = {};
+  if (title) cfg.title = title;
+  if (fields.length) cfg.fields = fields;
+  try {
+    await api('PUT', `/api/actions/${editActionId}`, {
+      actionCode: code, displayName: name,
+      actionConfig: Object.keys(cfg).length ? cfg : null,
+    });
+    closeModal('modal-action-edit');
+    toast('행위가 수정되었습니다');
+    loadActions();
+  } catch (e) { toast('실패: ' + e.message, true); }
+}
+
 async function deleteAction(id, name) {
   if (!confirm(`행위 "${name}"을 삭제하시겠습니까?\n이 행위가 연결된 직업-장부도 함께 삭제됩니다.`)) return;
   try {
@@ -982,16 +1133,6 @@ async function openJaModal(jobId) {
   const job = allJobs.find(j => j.id === jobId);
   document.getElementById('mja-job-name').textContent =
     `${job?.attributes?.icon ?? ''} ${job?.name ?? jobId} — 장부 관리`;
-  document.getElementById('mja-fields').innerHTML = '';
-  document.getElementById('mja-title').value = '';
-
-  // 행위 목록 로드
-  try {
-    const acts = await api('GET', '/api/actions');
-    document.getElementById('mja-action-sel').innerHTML =
-      acts.map(a => `<option value="${a.id}">[${esc(a.actionCode)}] ${esc(a.displayName)}</option>`).join('');
-  } catch {}
-
   openModal('modal-ja');
   await refreshJaList(jobId);
 }
@@ -999,7 +1140,12 @@ async function openJaModal(jobId) {
 async function refreshJaList(jobId) {
   const el = document.getElementById('mja-list');
   try {
-    const jas = await api('GET', `/api/jobs/${jobId}/actions`);
+    const [jas, acts] = await Promise.all([
+      api('GET', `/api/jobs/${jobId}/actions`),
+      api('GET', '/api/actions'),
+    ]);
+    document.getElementById('mja-action-sel').innerHTML =
+      acts.map(a => `<option value="${a.id}">[${esc(a.actionCode)}] ${esc(a.displayName)}</option>`).join('');
     if (!jas.length) {
       el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">연결된 장부 없음</div>';
       return;
@@ -1029,19 +1175,9 @@ async function removeJobAction(jaId) {
 async function submitJobAction() {
   const actionId = document.getElementById('mja-action-sel').value;
   if (!actionId) { toast('행위를 선택하세요', true); return; }
-  const title  = document.getElementById('mja-title').value.trim();
-  const fields = getFields('mja-fields');
-  const cfg = {};
-  if (title)         cfg.title  = title;
-  if (fields.length) cfg.fields = fields;
   try {
-    await api('POST', `/api/jobs/${jaJobId}/actions`, {
-      actionId: Number(actionId),
-      actionConfig: Object.keys(cfg).length ? cfg : undefined,
-    });
+    await api('POST', `/api/jobs/${jaJobId}/actions`, { actionId: Number(actionId) });
     toast('장부가 연결되었습니다');
-    document.getElementById('mja-title').value = '';
-    document.getElementById('mja-fields').innerHTML = '';
     await refreshJaList(jaJobId);
   } catch (e) { toast('실패: ' + e.message, true); }
 }
@@ -1233,7 +1369,10 @@ async function loadWorkflow() {
   }
 }
 
-function openWfModal() {
+async function openWfModal() {
+  if (!allJobs.length) {
+    try { allJobs = await api('GET', '/api/jobs'); } catch {}
+  }
   const jobOpts = allJobs.map(j => `<option value="${j.id}">${esc(j.attributes?.icon ?? '')} ${esc(j.name)}</option>`).join('');
   document.getElementById('mw-from').innerHTML = jobOpts;
   document.getElementById('mw-to').innerHTML   = jobOpts;

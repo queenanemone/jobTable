@@ -10,4 +10,6 @@ public interface ActivityLogRepository extends JpaRepository<ActivityLog, Intege
     List<ActivityLog> findByStudentId(Integer studentId);
 
     List<ActivityLog> findByJobActionId(Integer jobActionId);
+
+    List<ActivityLog> findByJobAction_Job_IdIn(List<Integer> jobIds);
 }
