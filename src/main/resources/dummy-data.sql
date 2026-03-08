@@ -14,14 +14,14 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- =====================================================
 -- 1. Job_Templates
 -- =====================================================
-INSERT INTO Job_Templates (id, name, base_salary, attributes) VALUES
-(1, '감사원',      1500, '{"color":"#9C27B0","icon":"🔍","description":"필수 직업 장부 감사 및 학급 회의 주최","maxCount":2,"isRequired":true}'),
-(2, '은행원',      1200, '{"color":"#2196F3","icon":"🏦","description":"월급 확인 및 저축 상품 관리","maxCount":1,"isRequired":true}'),
-(3, '통계청',      1100, '{"color":"#4CAF50","icon":"📊","description":"날짜별 제출물 현황 통계표 작성","maxCount":1,"isRequired":true}'),
-(4, '경찰',        1000, '{"color":"#F44336","icon":"👮","description":"학급 질서 관리 및 벌금 대장 작성","maxCount":1,"isRequired":true}'),
-(5, '신용평가위원', 1300, '{"color":"#FF9800","icon":"⭐","description":"신용등급 책정 및 신용평가 보고서 제출","maxCount":1,"isRequired":true}'),
-(6, '노동청',      1100, '{"color":"#795548","icon":"🏛","description":"선택 직업 역할 수행 관리","maxCount":1,"isRequired":true}'),
-(7, '국세청',      1400, '{"color":"#607D8B","icon":"💰","description":"학급 세금 수입/지출 관리","maxCount":1,"isRequired":true}');
+INSERT INTO Job_Templates (id, name, base_salary, color, icon, description, max_count, is_required) VALUES
+(1, '감사원',       1500, '#9C27B0', '🔍', '필수 직업 장부 감사 및 학급 회의 주최', 2, true),
+(2, '은행원',       1200, '#2196F3', '🏦', '월급 확인 및 저축 상품 관리',           1, true),
+(3, '통계청',       1100, '#4CAF50', '📊', '날짜별 제출물 현황 통계표 작성',         1, true),
+(4, '경찰',         1000, '#F44336', '👮', '학급 질서 관리 및 벌금 대장 작성',       1, true),
+(5, '신용평가위원', 1300, '#FF9800', '⭐', '신용등급 책정 및 신용평가 보고서 제출',  1, true),
+(6, '노동청',       1100, '#795548', '🏛', '선택 직업 역할 수행 관리',               1, true),
+(7, '국세청',       1400, '#607D8B', '💰', '학급 세금 수입/지출 관리',               1, true);
 
 -- =====================================================
 -- 2. Action_Master (actionConfig = 템플릿 필드 정의)

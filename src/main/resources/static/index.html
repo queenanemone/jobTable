@@ -484,6 +484,11 @@ input[type=color] { height: 38px; padding: 3px; cursor: pointer; }
         </select>
       </div>
     </div>
+    <div class="form-group">
+      <label class="form-label">자유 속성 <span style="font-size:11px;color:var(--muted)">(key / value)</span></label>
+      <div class="field-builder" id="mj-attrs"></div>
+      <button class="btn-add-field" style="margin-top:8px" onclick="addAttr('mj-attrs')">+ 속성 추가</button>
+    </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-job')">취소</button>
       <button class="btn btn-primary" onclick="submitJob()">저장</button>
@@ -952,42 +957,75 @@ async function loadJobs() {
   }
 }
 
+function addAttr(cid) {
+  const row = document.createElement('div');
+  row.className = 'field-row';
+  row.innerHTML = `
+    <input type="text" class="fname" placeholder="key" style="flex:1">
+    <input type="text" class="fval"  placeholder="value" style="flex:2">
+    <button class="field-row-btn" onclick="this.parentElement.remove()">✕</button>`;
+  document.getElementById(cid).appendChild(row);
+}
+function getAttrs(cid) {
+  const obj = {};
+  document.querySelectorAll(`#${cid} .field-row`).forEach(row => {
+    const k = row.querySelector('.fname')?.value.trim();
+    const v = row.querySelector('.fval')?.value.trim();
+    if (k) obj[k] = v;
+  });
+  return Object.keys(obj).length ? obj : null;
+}
+function setAttrs(cid, attrs) {
+  document.getElementById(cid).innerHTML = '';
+  if (!attrs) return;
+  Object.entries(attrs).forEach(([k, v]) => {
+    addAttr(cid);
+    const rows = document.querySelectorAll(`#${cid} .field-row`);
+    const row = rows[rows.length - 1];
+    row.querySelector('.fname').value = k;
+    row.querySelector('.fval').value  = v ?? '';
+  });
+}
 function openJobModal() {
   editJobId = null;
   document.getElementById('mj-title').textContent = '직업 추가';
   ['mj-name','mj-icon','mj-desc','mj-maxcount','mj-salary'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('mj-color').value    = '#3b82f6';
-  document.getElementById('mj-required').value = 'true';
+  document.getElementById('mj-required').value = 'false';
+  document.getElementById('mj-attrs').innerHTML = '';
   openModal('modal-job');
 }
 function openEditJob(id) {
   const j = allJobs.find(j => j.id === id);
   if (!j) return;
   editJobId = id;
-  const a = j.attributes || {};
   document.getElementById('mj-title').textContent = '직업 수정';
   document.getElementById('mj-name').value     = j.name ?? '';
   document.getElementById('mj-salary').value   = j.baseSalary ?? '';
-  document.getElementById('mj-icon').value     = a.icon ?? '';
-  document.getElementById('mj-color').value    = a.color ?? '#3b82f6';
-  document.getElementById('mj-desc').value     = a.description ?? '';
-  document.getElementById('mj-maxcount').value = a.maxCount ?? '';
-  document.getElementById('mj-required').value = a.isRequired ? 'true' : 'false';
+  document.getElementById('mj-icon').value     = j.icon ?? '';
+  document.getElementById('mj-color').value    = j.color ?? '#3b82f6';
+  document.getElementById('mj-desc').value     = j.description ?? '';
+  document.getElementById('mj-maxcount').value = j.maxCount ?? '';
+  document.getElementById('mj-required').value = j.isRequired ? 'true' : 'false';
+  setAttrs('mj-attrs', j.attributes);
   openModal('modal-job');
 }
 async function submitJob() {
   const name = document.getElementById('mj-name').value.trim();
   if (!name) { toast('직업명을 입력하세요', true); return; }
-  const a = {};
-  const icon = document.getElementById('mj-icon').value.trim();
-  const desc = document.getElementById('mj-desc').value.trim();
-  const mc   = document.getElementById('mj-maxcount').value;
-  if (icon) a.icon = icon;
-  a.color      = document.getElementById('mj-color').value;
-  if (desc) a.description = desc;
-  if (mc)   a.maxCount    = Number(mc);
-  a.isRequired = document.getElementById('mj-required').value === 'true';
-  const body = { name, baseSalary: Number(document.getElementById('mj-salary').value) || 0, attributes: a };
+  const icon  = document.getElementById('mj-icon').value.trim();
+  const desc  = document.getElementById('mj-desc').value.trim();
+  const mc    = document.getElementById('mj-maxcount').value;
+  const body  = {
+    name,
+    baseSalary:  Number(document.getElementById('mj-salary').value) || 0,
+    color:       document.getElementById('mj-color').value,
+    icon:        icon || null,
+    description: desc || null,
+    maxCount:    mc ? Number(mc) : null,
+    isRequired:  document.getElementById('mj-required').value === 'true',
+    attributes:  getAttrs('mj-attrs'),
+  };
   try {
     if (editJobId) {
       await api('PUT', `/api/jobs/${editJobId}`, body);

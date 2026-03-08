@@ -46,9 +46,7 @@ public class JobService {
     @Transactional
     public JobResponse createJob(JobRequest request) {
         JobTemplate job = new JobTemplate();
-        job.setName(request.getName());
-        job.setBaseSalary(request.getBaseSalary() != null ? request.getBaseSalary() : 0);
-        job.setAttributes(request.getAttributes());
+        applyRequest(job, request);
         return JobResponse.from(jobRepository.save(job));
     }
 
@@ -56,10 +54,19 @@ public class JobService {
     public JobResponse updateJob(Integer id, JobRequest request) {
         JobTemplate job = jobRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("직업을 찾을 수 없습니다. id=" + id));
+        applyRequest(job, request);
+        return JobResponse.from(job);
+    }
+
+    private void applyRequest(JobTemplate job, JobRequest request) {
         job.setName(request.getName());
         job.setBaseSalary(request.getBaseSalary() != null ? request.getBaseSalary() : 0);
+        job.setColor(request.getColor());
+        job.setIcon(request.getIcon());
+        job.setDescription(request.getDescription());
+        job.setMaxCount(request.getMaxCount());
+        job.setIsRequired(request.getIsRequired() != null ? request.getIsRequired() : false);
         job.setAttributes(request.getAttributes());
-        return JobResponse.from(job);
     }
 
     @Transactional

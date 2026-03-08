@@ -23,6 +23,21 @@ public class JobTemplate {
     @Column(name = "base_salary")
     private Integer baseSalary = 0;
 
+    @Column(length = 10)
+    private String color;
+
+    @Column(length = 10)
+    private String icon;
+
+    @Column(length = 200)
+    private String description;
+
+    @Column(name = "max_count")
+    private Integer maxCount;
+
+    @Column(name = "is_required")
+    private Boolean isRequired = false;
+
     @Column(columnDefinition = "JSON")
     @Convert(converter = JsonConverter.class)
     private Map<String, Object> attributes;
@@ -51,6 +66,21 @@ public class JobTemplate {
 
     public Integer getBaseSalary() { return baseSalary; }
     public void setBaseSalary(Integer baseSalary) { this.baseSalary = baseSalary; }
+
+    public String getColor() { return color; }
+    public void setColor(String color) { this.color = color; }
+
+    public String getIcon() { return icon; }
+    public void setIcon(String icon) { this.icon = icon; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public Integer getMaxCount() { return maxCount; }
+    public void setMaxCount(Integer maxCount) { this.maxCount = maxCount; }
+
+    public Boolean getIsRequired() { return isRequired; }
+    public void setIsRequired(Boolean isRequired) { this.isRequired = isRequired; }
 
     public Map<String, Object> getAttributes() { return attributes; }
     public void setAttributes(Map<String, Object> attributes) { this.attributes = attributes; }
