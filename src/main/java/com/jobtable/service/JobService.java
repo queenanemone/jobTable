@@ -108,6 +108,7 @@ public class JobService {
         JobAction jobAction = new JobAction();
         jobAction.setJob(job);
         jobAction.setAction(action);
+        jobAction.setActionConfig(request.getActionConfig());
         return JobActionResponse.from(jobActionRepository.save(jobAction));
     }
 }

@@ -1,7 +1,6 @@
 package com.jobtable.dto.jobaction;
 
 import com.jobtable.entity.JobAction;
-
 import java.util.Map;
 
 public class JobActionResponse {
@@ -20,7 +19,7 @@ public class JobActionResponse {
         r.actionId = ja.getAction().getId();
         r.actionCode = ja.getAction().getActionCode();
         r.displayName = ja.getAction().getDisplayName();
-        r.actionConfig = ja.getAction().getActionConfig();
+        r.actionConfig = ja.getActionConfig();
         return r;
     }
 

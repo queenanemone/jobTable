@@ -1,14 +1,15 @@
 package com.jobtable.entity;
 
-import com.jobtable.converter.JsonConverter;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.Map;
 
 @Entity
-@Table(name = "Activity_Logs")
+@Table(name = "activity_logs")
 public class ActivityLog {
 
     @Id
@@ -23,8 +24,8 @@ public class ActivityLog {
     @JoinColumn(name = "job_action_id", nullable = false)
     private JobAction jobAction;
 
-    @Column(columnDefinition = "JSON", nullable = false)
-    @Convert(converter = JsonConverter.class)
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb", nullable = false)
     private Map<String, Object> content;
 
     @CreationTimestamp

@@ -3,7 +3,7 @@ package com.jobtable.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "Job_Workflow")
+@Table(name = "job_workflow")
 public class JobWorkflow {
 
     @Id

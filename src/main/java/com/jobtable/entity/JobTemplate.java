@@ -1,8 +1,9 @@
 package com.jobtable.entity;
 
-import com.jobtable.converter.JsonConverter;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @Entity
-@Table(name = "Job_Templates")
+@Table(name = "job_templates")
 public class JobTemplate {
 
     @Id
@@ -38,8 +39,8 @@ public class JobTemplate {
     @Column(name = "is_required")
     private Boolean isRequired = false;
 
-    @Column(columnDefinition = "JSON")
-    @Convert(converter = JsonConverter.class)
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
     private Map<String, Object> attributes;
 
     @CreationTimestamp

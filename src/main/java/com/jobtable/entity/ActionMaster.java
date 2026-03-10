@@ -1,16 +1,14 @@
 package com.jobtable.entity;
 
-import com.jobtable.converter.JsonConverter;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Entity
-@Table(name = "Action_Master")
+@Table(name = "action_master")
 public class ActionMaster {
 
     @Id
@@ -22,10 +20,6 @@ public class ActionMaster {
 
     @Column(name = "display_name", nullable = false, length = 50)
     private String displayName;
-
-    @Column(name = "action_config", columnDefinition = "JSON")
-    @Convert(converter = JsonConverter.class)
-    private Map<String, Object> actionConfig;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -42,9 +36,6 @@ public class ActionMaster {
 
     public String getDisplayName() { return displayName; }
     public void setDisplayName(String displayName) { this.displayName = displayName; }
-
-    public Map<String, Object> getActionConfig() { return actionConfig; }
-    public void setActionConfig(Map<String, Object> actionConfig) { this.actionConfig = actionConfig; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
 
